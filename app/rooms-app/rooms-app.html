@@ -1,0 +1,91 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+
+<link rel="import" href="../hue-control/hue-control.html">
+<link rel="lazy-import" href="../hue-bridges/hue-bridges.html">
+<link rel="lazy-import" href="../hue-bridge/hue-bridge.html">
+
+<dom-module id="rooms-app">
+  <template>
+    <style>
+      :host { display:block; }
+    </style>
+    <app-location 
+      route="{{route}}" 
+      url-space-regex="^[[rootPath]]">
+    </app-location>
+    <app-route
+      route="{{route}}"
+      pattern="[[rootPath]]:page"
+      data="{{routeData}}"
+      tail="{{subroute}}">
+    </app-route>
+
+    <hue-control bridges="{{data}}"></hue-control>
+
+    <iron-pages
+      selected="[[page]]"
+      attr-for-selected="name"
+      fallback-selection="view404"
+      role="main">
+      <hue-bridges 
+        name="hue-bridges"
+        bridges="[[data]]"></hue-bridges>
+      <hue-bridge name="hue-bridge"></hue-bridge>
+    </iron-pages>
+  </template>
+  <script>
+    class RoomsApp extends Polymer.Element {
+      static get is() { return 'rooms-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          routeData: Object,
+          subroute: String,
+          rootPath: String,
+        }
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      _routePageChanged(page) {
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'view1' in that case.
+        this.page = page || 'hue-bridges';
+
+        // // Close a non-persistent drawer when the page & route are changed.
+        // if (!this.$.drawer.persistent) {
+        //   this.$.drawer.close();
+        // }
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('/app/' + page + '/' + page + '.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      _showPage404() {
+        this.page = 'view404';
+      }
+    }
+
+    window.customElements.define(RoomsApp.is, RoomsApp);
+  </script>
+</dom-module>

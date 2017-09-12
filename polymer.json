@@ -1,0 +1,31 @@
+{
+  "entrypoint": "index.html",
+  "shell": "app/rooms-app/rooms-app.html",
+  "fragments": [
+    "app/hue-bridges/hue-bridges.html",
+    "app/hue-bridge/hue-bridge.html"
+  ],
+  "sources": [
+    "app/**/*",
+    "images/**/*",
+    "bower.json"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  },
+  "builds": [
+    {
+      "preset": "es5-bundled"
+    },
+    {
+      "preset": "es6-bundled"
+    },
+    {
+      "preset": "es6-unbundled"
+    }
+  ]
+}

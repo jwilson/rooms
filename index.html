@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <title>hue rooms</title>
+    <base href="/">
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        window.Polymer = { rootPath: '/' };
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', _ => {
+            navigator.serviceWorker.register('service-worker.js', {
+              scope: Polymer.rootPath,
+            });
+          });
+        }
+      </script>
+    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+    <link rel="import" href="app/rooms-app/rooms-app.html">
+  </head>
+  <body>
+    <rooms-app></rooms-app>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+ 
+<dom-module id="hue-bridges">
+  <template>
+    <style>
+      :host { display:block; }
+      paper-listbox { border: 1px dotted #ccc; }
+    </style>
+    <paper-listbox selected="[[selected]]" attr-for-selected="name">
+      <template is="dom-repeat" items="[[bridges]]">
+        <paper-item><a href="/hue-bridge/?ip=[[item.internalipaddress]]&id=[[item.id]]">[[item.internalipaddress]]</a></paper-item>
+      </template>
+    </paper-listbox>
+  </template>
+  <script>
+    class HueBridges extends Polymer.Element {
+      static get is() { return 'hue-bridges'; }
+
+      static get properties() {
+        return {
+          bridges: Object,
+          selected: {
+            type: String,
+            notify: true
+          }
+        };
+      }
+    }
+
+    window.customElements.define(HueBridges.is, HueBridges);
+  </script>
+</dom-module>

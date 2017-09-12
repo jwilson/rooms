@@ -1,0 +1,53 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+
+<script src="js/hue.js"></script>
+
+<dom-module id="hue-control">
+  <template>
+    <app-localstorage-document
+      key="bridges" 
+      data="{{bridges}}">
+    </app-localstorage-document>  
+  </template>
+  <script>
+    class HueControl extends Polymer.Element {
+      static get is() { return 'hue-control'; }
+
+      static get properties() {
+        return {
+          _hue: Object,
+          bridges: {
+            type: Object,
+            readonly: true,
+            notify: true
+          }
+        };
+      }
+
+      ready() {
+        super.ready();
+
+        this._hue = window.hue = jsHue();
+      }
+
+      connectedCallback() {
+        if (super.connectedCallback) {
+          super.connectedCallback();
+        }
+
+        console.log('discovering bridges...');
+
+        this._hue.discover().then(bridges => {
+          if (bridges.length == 0) {
+            console.log('no bridges found');
+          } else {
+            this.bridges = bridges;
+          }
+        });
+      }
+    }
+
+    window.customElements.define(HueControl.is, HueControl);
+  </script>
+</dom-module>

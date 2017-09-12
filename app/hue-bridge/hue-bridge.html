@@ -1,0 +1,137 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+
+<link rel="import" href="../hue-device-list/hue-device-list.html">
+
+<dom-module id="hue-bridge">
+  <template>
+    <app-localstorage-document 
+      key="bridgeUser" 
+      data="{{persistedUser}}"
+      log>
+    </app-localstorage-document>
+    <app-localstorage-document 
+      key="bridgeCapabilities" 
+      data="{{persistedBridgeCapabilities}}">
+    </app-localstorage-document>
+
+    <div>press the link button on the bridge and then click the link button</div>
+    <div>
+      <button on-click="_link">link</button>
+      <button on-click="_test">test</button>
+    </div>
+
+    <paper-card>
+      <div class="card-content">
+        <hue-device-list devices="[[persistedBridgeCapabilities.lights]]"></hue-device-list>
+      </div>
+    </paper-card>
+
+    <template is="dom-repeat" items="[[persistedLights]]">
+      
+    </template>
+  </template>
+  <script>
+    class HueBridge extends Polymer.Element {
+      static get is() { return 'hue-bridge'; }
+
+      static get properties() { 
+        return {
+          id: String,
+          ip: String,
+          user: {
+            type: Object,
+            readonly: true
+          },
+          persistedUser: {
+            type: Object,
+            observer: '_persistedUserChanged'
+          },
+          persistedBridgeCapabilities: {
+            type: Object
+          }
+        };
+      }
+
+      ready() {
+        super.ready();
+
+        this._parseQueryString();
+
+        this._hue = window.hue;
+      }
+
+      connectedCallback() {
+        if (super.connectedCallback) {
+          super.connectedCallback();
+        }
+
+        if (!this._hue) {
+          throw "the hue-control has not initialized the hue object";
+        }
+
+        this._bridge = this._hue.bridge(this.ip);
+      }
+
+      _persistedUserChanged(newValue, oldValue) {
+        if (oldValue === undefined) {
+          this._ensureBridge();
+
+          this.user.getCapabilities().then(data => {
+            this.persistedBridgeCapabilities = data;
+          });
+
+          this.user.getConfig().then(data => {
+
+          });
+        }
+      }
+
+      _parseQueryString() {
+        let search = new URLSearchParams(window.location.search);
+
+        this.ip = search.get('ip');
+        this.id = search.get('id');
+      }
+
+      _ensureBridge() {
+        if (!this.user) {
+          this.user = this._bridge.user(this.persistedUser);
+          console.log(this.user);
+        }
+      }
+
+      _link() {
+        this._bridge.createUser('rooms#' + this.id).then(data => {
+          data.forEach(result => {
+            if (result.success) {
+              this.persistedUser = result.success.username;
+              this._ensureBridge();
+            } else if (result.error) {
+              console.log(result);
+            }
+          });
+        });
+      }
+
+      _test() {
+        this._ensureBridge();
+
+        // this.bridgeUser.deleteUser('KYjHwQAxVq59k-HjYUy6fXpKB5hLtsEUHdmrJDTZ').then(data => {
+        //   console.log(data);
+        // });
+
+        // this.bridgeUser.getConfig().then(config => {
+        //   console.log(config);
+        // });
+
+        this.user.setLightState(1, { on: false }).then(data => {
+          console.log(data);
+        });
+      }
+    }
+
+    window.customElements.define(HueBridge.is, HueBridge);
+  </script>
+</dom-module>
